@@ -1,10 +1,11 @@
+<!-- filepath: /c:/Users/ilian/OneDrive/Bureaublad/frontend-vue/src/components/OrderOverview.vue -->
 <template>
-    <div class="p-4">
-      <h1 class="text-2xl font-bold">Orders</h1>
-      <ul class="mt-4 space-y-2">
-        <li v-for="order in orders" :key="order.id" class="p-4 bg-white rounded-lg shadow-md">
-          <router-link :to="`/orders/${order.id}`" class="text-blue-600">{{ order.id }} - {{ order.status }}</router-link>
-          <button @click="deleteOrder(order.id)" class="ml-4 text-red-600">Delete</button>
+    <div class="p-4 bg-gray-100 min-h-screen">
+      <h1 class="text-2xl font-bold mb-4">Orders</h1>
+      <ul class="space-y-4">
+        <li v-for="order in orders" :key="order.id" class="p-4 bg-white rounded-lg shadow-md flex justify-between items-center">
+          <router-link :to="`/orders/${order.id}`" class="text-blue-600 hover:underline">{{ order.id }} - {{ order.status }}</router-link>
+          <button @click="deleteOrder(order.id)" class="ml-4 text-red-600 hover:text-red-800">Delete</button>
         </li>
       </ul>
     </div>
@@ -35,3 +36,7 @@
     }
   };
   </script>
+  
+  <style scoped>
+  /* Add your styles here */
+  </style>

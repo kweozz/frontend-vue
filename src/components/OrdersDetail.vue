@@ -1,26 +1,14 @@
+<!-- filepath: /c:/Users/ilian/OneDrive/Bureaublad/frontend-vue/src/components/OrdersDetail.vue -->
 <template>
-    <div class="order-detail-container">
-      <h1>Order Details</h1>
-      <div v-if="order" class="order-detail">
-        <p><strong>Order ID:</strong> {{ order.id }}</p>
-        <p><strong>Created:</strong> {{ formatDate(order.createdAt) }}</p>
-        <p><strong>Customer:</strong> {{ order.customerName }}</p>
-        <p><strong>Total Price:</strong> {{ order.totalPrice }}</p>
-        <p><strong>Status:</strong></p>
-        <select v-model="order.status" @change="updateStatus">
-          <option value="Pending">Pending</option>
-          <option value="Delivered">Delivered</option>
-          <option value="Cancelled">Cancelled</option>
-        </select>
-        <h2>Items</h2>
-        <ul>
-          <li v-for="item in order.items" :key="item.id">
-            {{ item.name }} - {{ item.quantity }} x ${{ item.price }}
-          </li>
-        </ul>
-        <button @click="goBack">Back to Orders</button>
+    <div class="p-4 bg-gray-100 min-h-screen">
+      <h1 class="text-2xl font-bold mb-4">Order Details</h1>
+      <div v-if="order" class="p-4 bg-white rounded-lg shadow-md">
+        <p><strong>ID:</strong> {{ order.id }}</p>
+        <p><strong>Status:</strong> {{ order.status }}</p>
+        <p><strong>Date:</strong> {{ formatDate(order.date) }}</p>
+        <button @click="updateStatus" class="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Update Status</button>
       </div>
-      <p v-if="error" class="error">{{ error }}</p>
+      <p v-if="error" class="text-red-600 mt-4">{{ error }}</p>
     </div>
   </template>
   
@@ -29,25 +17,23 @@
     data() {
       return {
         order: null,
-        error: null,
+        error: null
       };
     },
-    async created() {
-      try {
-        const orderId = this.$route.params.id;
-        const response = await fetch(`https://example.com/api/orders/${orderId}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        if (!response.ok) throw new Error("Failed to fetch order details");
-        const data = await response.json();
-        this.order = data.order;
-      } catch (err) {
-        this.error = err.message;
-      }
+    created() {
+      this.fetchOrder();
     },
     methods: {
+      async fetchOrder() {
+        try {
+          const response = await fetch(`https://example.com/api/orders/${this.$route.params.id}`);
+          if (!response.ok) throw new Error("Failed to fetch order details");
+          const data = await response.json();
+          this.order = data.order;
+        } catch (err) {
+          this.error = err.message;
+        }
+      },
       formatDate(dateString) {
         const options = { year: "numeric", month: "short", day: "numeric" };
         return new Date(dateString).toLocaleDateString(undefined, options);
@@ -66,67 +52,11 @@
         } catch (err) {
           this.error = err.message;
         }
-      },
-      goBack() {
-        this.$router.push("/orders");
-      },
-    },
+      }
+    }
   };
   </script>
   
   <style scoped>
-  .order-detail-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  h1, h2 {
-    text-align: center;
-  }
-  
-  .order-detail p {
-    margin: 10px 0;
-  }
-  
-  select {
-    width: 100%;
-    padding: 8px;
-    margin: 10px 0;
-  }
-  
-  ul {
-    list-style: none;
-    padding: 0;
-  }
-  
-  li {
-    padding: 10px;
-    background: #f9f9f9;
-    margin-bottom: 10px;
-    border-radius: 4px;
-  }
-  
-  button {
-    width: 100%;
-    padding: 10px;
-    background: #000;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background: #00ff00;
-    color: #000;
-  }
-  
-  .error {
-    color: red;
-    text-align: center;
-  }
+  /* Add your styles here */
   </style>
