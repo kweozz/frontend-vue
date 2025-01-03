@@ -1,3 +1,20 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background-color: white;
+  border-bottom: 1px solid #ddd;
+}
+
+.navbar h2 {
+  margin: 0;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
