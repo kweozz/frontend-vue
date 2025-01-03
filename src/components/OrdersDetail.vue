@@ -6,7 +6,7 @@
       </div>
       <div class="navbar flex items-center justify-between p-4 bg-white border-b border-gray-300">
         <div class="logo w-1/5">
-          <img src="logo.png" alt="Logo" class="w-full">
+          <img src="/src/assets/logo-swear.png" alt="Logo" class="w-full">
         </div>
         <h2 class="text-lg font-medium tracking-wider">Order Details</h2>
         <div class="nav-icons flex items-center gap-4">
@@ -19,7 +19,7 @@
       <div class="flex-1 p-4 overflow-auto">
         <h1 class="text-2xl font-bold mb-4">Order Details</h1>
         <div v-if="order" class="p-4 bg-white rounded-lg shadow-md">
-          <p><strong>ID:</strong> {{ order.id }}</p>
+          <p><strong>ID:</strong> {{ order._id }}</p>
           <p><strong>Status:</strong> {{ order.status }}</p>
           <p><strong>Date:</strong> {{ formatDate(order.date) }}</p>
           <table class="min-w-full bg-white">
@@ -36,7 +36,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="item in order.items" :key="item.productId">
+              <tr v-for="item in order.shoeConfig" :key="item.productId">
                 <td class="py-2">{{ item.productId }}</td>
                 <td class="py-2">{{ item.colors.join(', ') }}</td>
                 <td class="py-2">{{ item.fabrics.join(', ') }}</td>
@@ -69,11 +69,19 @@
     methods: {
       async fetchOrder() {
         try {
-          const response = await fetch(`https://example.com/api/orders/${this.$route.params.id}`);
-          if (!response.ok) throw new Error("Failed to fetch order details");
-          const data = await response.json();
-          this.order = data.order;
+          const response = await fetch('/api/v1/orders');
+          if (!response.ok) throw new Error(`Failed to fetch orders: ${response.statusText}`);
+          const result = await response.json();
+          console.log(result); // Log the response to see its structure
+          console.log(this.$route.params.id); // Log the route parameter ID
+          // For testing, log all orders
+          console.log(result.data.orders);
+          // Adjust this line based on the actual structure of the response
+          this.order = result.data.orders.find(order => String(order._id) === String(this.$route.params.id));
+          console.log(this.order); // Log the found order
+          if (!this.order) throw new Error('Order not found');
         } catch (err) {
+          console.error('Error fetching order details:', err);
           this.error = err.message;
         }
       },
@@ -83,7 +91,7 @@
       },
       async updateStatus() {
         try {
-          const response = await fetch(`https://example.com/api/orders/${this.order.id}`, {
+          const response = await fetch(`/api/v1/orders/${this.order._id}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -91,8 +99,9 @@
             },
             body: JSON.stringify({ status: this.order.status }),
           });
-          if (!response.ok) throw new Error("Failed to update status");
+          if (!response.ok) throw new Error(`Failed to update status: ${response.statusText}`);
         } catch (err) {
+          console.error('Error updating status:', err);
           this.error = err.message;
         }
       }
