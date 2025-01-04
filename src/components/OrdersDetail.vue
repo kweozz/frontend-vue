@@ -77,7 +77,7 @@
           // For testing, log all orders
           console.log(result.data.orders);
           // Adjust this line based on the actual structure of the response
-          this.order = result.data.orders.find(order => String(order._id) === String(this.$route.params.id));
+          this.order = result.data.orders.find(order => order._id === parseInt(this.$route.params.id));
           console.log(this.order); // Log the found order
           if (!this.order) throw new Error('Order not found');
         } catch (err) {
