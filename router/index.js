@@ -1,6 +1,7 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router'; // Added missing imports
 import OrderOverview from '../src/components/OrderOverview.vue';
 import OrdersDetail from '../src/components/OrdersDetail.vue';
+
 
 const routes = [
   { path: '/', redirect: '/orders' },

@@ -1,42 +1,43 @@
-<!-- filepath: /c:/Users/ilian/OneDrive/Bureaublad/frontend-vue/src/components/OrderOverview.vue -->
 <template>
-    <div class="p-4 bg-gray-100 min-h-screen">
-      <h1 class="text-2xl font-bold mb-4">Orders</h1>
-      <ul class="mt-4 space-y-2">
-        <li v-for="order in orders" :key="order.id" class="p-4 bg-white rounded-lg shadow-md">
-          <router-link :to="`/orders/${order.id}`" class="text-blue-600">{{ order.id }} - {{ order.status }}</router-link>
-          <button @click="deleteOrder(order.id)" class="ml-4 text-red-600">Delete</button>
-        </li>
-      </ul>
-    </div>
-  </template>
-  
-  <script>
-  export default {
-    data() {
-      return {
-        orders: []
-      };
-    },
-    created() {
-      this.fetchOrders();
-    },
-    methods: {
-      fetchOrders() {
-        // Fetch orders from API
-        this.orders = [
-          { id: 1, status: 'Pending' },
-          { id: 2, status: 'Shipped' }
-        ];
-      },
-      deleteOrder(id) {
-        // Delete order logic
-        this.orders = this.orders.filter(order => order.id !== id);
-      }
-    }
-  };
-  </script>
-  
-  <style scoped>
-  /* Add your styles here */
-  </style>
+  <div class="p-4">
+    <h1 class="text-2xl font-bold mb-4">Order Overview</h1>
+    <table class="min-w-full bg-white border border-gray-200">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="py-2 px-4 border-b">Order Number</th>
+          <th class="py-2 px-4 border-b">Customer Name</th>
+          <th class="py-2 px-4 border-b">Shoe Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="order in orders" :key="order._id" class="hover:bg-gray-50">
+          <td class="py-2 px-4 border-b">{{ order._id }}</td>
+          <td class="py-2 px-4 border-b">{{ order.user }}</td>
+          <td class="py-2 px-4 border-b">{{ order.shoeName }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</template>
+
+<script>
+import { defineComponent } from 'vue';
+import axios from 'axios';
+
+export default defineComponent({
+  name: 'OrderOverview',
+  data() {
+    return {
+      orders: undefined
+    };
+  },
+  mounted() {
+    axios.get('https://node-api-backend-v1.onrender.com/api/v1/orders/')
+      .then(response => {
+        console.log(response.data.data.orders);
+        this.orders = response.data.data.orders;
+      });
+  },
+});
+</script>
+
