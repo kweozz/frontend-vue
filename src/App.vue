@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    <h1>Fetch Order Data - Tutorial</h1>
     <OrderOverview />
   </div>
 </template>
