@@ -33,7 +33,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="order in filteredOrders" :key="order._id">
+          <tr v-for="order in filteredOrders" :key="order._id" @click="goToOrderDetail(order._id)">
             <td>{{ order._id }}</td>
             <td>{{ order.user.firstName }} {{ order.user.lastName }}</td>
             <td>{{ order.status }}</td>
@@ -57,7 +57,8 @@ export default defineComponent({
         orderNumber: '',
         customerName: '',
         orderStatus: ''
-      }
+      },
+      error: ''
     };
   },
   computed: {
@@ -71,15 +72,21 @@ export default defineComponent({
     }
   },
   mounted() {
-    axios.get('https://node-api-backend-v1.onrender.com/api/v1/orders/')
-      .then(response => {
-        console.log(response.data.data.orders);
-        this.orders = response.data.data.orders;
-      });
+    this.fetchOrders();
   },
   methods: {
-    applyFilter() {
-      // This method is intentionally left empty as the filtering is handled by the computed property
+    async fetchOrders() {
+      try {
+        const response = await axios.get('https://node-api-backend-v1.onrender.com/api/v1/orders/', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        this.orders = response.data.data.orders;
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+        this.error = 'Failed to fetch orders';
+      }
     }
   }
 });
