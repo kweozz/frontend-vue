@@ -9,6 +9,19 @@
       <h2>ADMIN</h2>
     </nav>
 
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <input type="text" v-model="filter.orderNumber" placeholder="Filter by Order Number" />
+      <input type="text" v-model="filter.customerName" placeholder="Filter by Customer Name" />
+      <select v-model="filter.orderStatus">
+        <option value="">All Statuses</option>
+        <option value="Pending">Pending</option>
+        <option value="Shipped">Shipped</option>
+        <option value="Delivered">Delivered</option>
+      </select>
+      <button @click="applyFilter">Apply Filter</button>
+    </div>
+
     <!-- Order Overview -->
     <div class="order-summary-container">
       <table class="order-table">
@@ -20,7 +33,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="order in orders" :key="order._id">
+          <tr v-for="order in filteredOrders" :key="order._id">
             <td>{{ order._id }}</td>
             <td>{{ order.user.firstName }} {{ order.user.lastName }}</td>
             <td>{{ order.status }}</td>
@@ -39,8 +52,23 @@ export default defineComponent({
   name: 'OrderOverview',
   data() {
     return {
-      orders: []
+      orders: [],
+      filter: {
+        orderNumber: '',
+        customerName: '',
+        orderStatus: ''
+      }
     };
+  },
+  computed: {
+    filteredOrders() {
+      return this.orders.filter(order => {
+        const matchesOrderNumber = order._id.includes(this.filter.orderNumber);
+        const matchesCustomerName = `${order.user.firstName} ${order.user.lastName}`.toLowerCase().includes(this.filter.customerName.toLowerCase());
+        const matchesOrderStatus = this.filter.orderStatus ? order.status === this.filter.orderStatus : true;
+        return matchesOrderNumber && matchesCustomerName && matchesOrderStatus;
+      });
+    }
   },
   mounted() {
     axios.get('https://node-api-backend-v1.onrender.com/api/v1/orders/')
@@ -49,6 +77,11 @@ export default defineComponent({
         this.orders = response.data.data.orders;
       });
   },
+  methods: {
+    applyFilter() {
+      // This method is intentionally left empty as the filtering is handled by the computed property
+    }
+  }
 });
 </script>
 
@@ -87,6 +120,34 @@ h2 {
 
 .logo {
   width: 10%;
+}
+
+/* Filter Section */
+.filter-section {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.filter-section input,
+.filter-section select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.filter-section button {
+  padding: 10px 20px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.filter-section button:hover {
+  background-color: #00ff00;
+  color: #000;
 }
 
 /* Order Page */
@@ -157,6 +218,30 @@ h2 {
 
   .order-table th, .order-table td {
     padding: 2px;
+  }
+
+  .order-table, .order-table thead, .order-table tbody, .order-table th, .order-table td, .order-table tr {
+    display: block;
+  }
+
+  .order-table tr {
+    margin-bottom: 15px;
+  }
+
+  .order-table td {
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+  }
+
+  .order-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 50%;
+    padding-left: 15px;
+    font-weight: bold;
+    text-align: left;
   }
 }
 </style>
