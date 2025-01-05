@@ -104,7 +104,7 @@ body {
   background-color: white;
   border-bottom: 1px solid #ddd;
 }
-.navbar h2{
+.navbar h2 {
   font-weight: 400;
 }
 
@@ -171,7 +171,6 @@ h2 {
 
 .order-table th,
 .order-table td {
- 
   border-bottom: 1px solid #ddd;
   text-align: left;
   font-weight: 400;
@@ -186,13 +185,14 @@ h2 {
   text-transform: uppercase;
 }
 
-.order-table td:hover{
+.order-table td:hover {
   color: black;
   font-weight: 600;
   transition: cubic-bezier(0.165, 0.84, 0.44, 1);
 }
+
 .order-table tr:hover {
-background-color: #ddd;
+  background-color: #ddd;
 }
 
 /* Responsive Styling */
@@ -213,11 +213,33 @@ background-color: #ddd;
   .order-table th, .order-table td {
     padding: 5px;
   }
+
+  .filter-section {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .filter-section input,
+  .filter-section select,
+  .filter-section button {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
   .navbar h2 {
     font-size: 1rem;
+  }
+
+  .filter-section input,
+  .filter-section select,
+  .filter-section button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .filter-section {
+    flex-direction: column;
   }
 
   .order-page {
