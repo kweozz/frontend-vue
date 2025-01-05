@@ -1,4 +1,3 @@
-<!-- filepath: /c:/Users/ilian/OneDrive/Bureaublad/frontend-vue/src/components/OrdersDetail.vue -->
 <template>
   <div class="order-page">
     <!-- Navbar -->
@@ -17,29 +16,34 @@
         <p><strong>ID:</strong> {{ order._id }}</p>
         <p><strong>Status:</strong> {{ order.status }}</p>
         <p><strong>Date:</strong> {{ formatDate(order.date) }}</p>
+        <p><strong>Shoe Name:</strong> {{ order.shoeName }}</p>
+        <p><strong>User:</strong> {{ order.user?.firstName || 'N/A' }} {{ order.user?.lastName || '' }}</p>
+        <p><strong>Phone:</strong> {{ order.user?.phone || 'N/A' }}</p>
+        <p><strong>Email:</strong> {{ order.user?.email || 'N/A' }}</p>
+        <p><strong>Address:</strong> {{ order.user?.address || 'N/A' }}</p>
         <table class="order-table">
           <thead>
             <tr>
-              <th>Product ID</th>
               <th>Colors</th>
               <th>Fabrics</th>
               <th>Initials</th>
               <th>Size</th>
-              <th>Price</th>
-              <th>Quantity</th>
-              <th>Total</th>
+              <th>Base Price</th>
+              <th>Customization Fee</th>
+              <th>Shipping Cost</th>
+              <th>Total Price</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in order.shoeConfig" :key="item.productId">
-              <td>{{ item.productId }}</td>
-              <td>{{ item.colors.join(', ') }}</td>
-              <td>{{ item.fabrics.join(', ') }}</td>
-              <td>{{ item.initials }}</td>
-              <td>{{ item.size }}</td>
-              <td>{{ item.price }}</td>
-              <td>{{ item.quantity }}</td>
-              <td>{{ item.price * item.quantity }}</td>
+            <tr>
+              <td>{{ order.shoeConfig?.colors?.join(', ') || 'N/A' }}</td>
+              <td>{{ order.shoeConfig?.fabrics?.join(', ') || 'N/A' }}</td>
+              <td>{{ order.shoeConfig?.initials || 'N/A' }}</td>
+              <td>{{ order.shoeConfig?.size || 'N/A' }}</td>
+              <td>{{ order.price?.basePrice || 'N/A' }}</td>
+              <td>{{ order.price?.customizationFee || 'N/A' }}</td>
+              <td>{{ order.price?.shippingCost || 'N/A' }}</td>
+              <td>{{ order.price?.totalPrice || 'N/A' }}</td>
             </tr>
           </tbody>
         </table>
@@ -51,6 +55,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
@@ -64,40 +70,41 @@ export default {
   methods: {
     async fetchOrder() {
       try {
-        const response = await fetch(`/api/v1/orders/${this.$route.params.id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+        const token = localStorage.getItem('token');
+        if (token) {
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          const response = await axios.get(`https://node-api-backend-v1.onrender.com/api/v1/orders/${this.$route.params.id}`);
+          console.log('Order response:', response); // Log the entire response for debugging
+          if (response.data) {
+            this.order = response.data;
+            console.log('Order:', this.order); // Log the order for debugging
+          } else {
+            this.error = 'Failed to retrieve order';
           }
-        });
-        if (!response.ok) throw new Error(`Failed to fetch order: ${response.statusText}`);
-        const result = await response.json();
-        this.order = result.data.order;
-        if (!this.order) throw new Error('Order not found');
+        } else {
+          this.error = 'No token found';
+        }
       } catch (err) {
-        console.error('Error fetching order details:', err);
-        this.error = err.message;
+        console.error('Error fetching order details:', err); // Log the error for debugging
+        if (err.response) {
+          console.error('Response data:', err.response.data);
+          console.error('Response status:', err.response.status);
+          console.error('Response headers:', err.response.headers);
+          this.error = 'Failed to retrieve order';
+        } else if (err.request) {
+          console.error('Request data:', err.request);
+          this.error = 'No response received from server';
+        } else {
+          console.error('Error message:', err.message);
+          this.error = 'Error in setting up the request';
+        }
       }
     },
     formatDate(dateString) {
       const options = { year: "numeric", month: "short", day: "numeric" };
       return new Date(dateString).toLocaleDateString(undefined, options);
     },
-    async updateStatus() {
-      try {
-        const response = await fetch(`/api/v1/orders/${this.order._id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({ status: this.order.status }),
-        });
-        if (!response.ok) throw new Error(`Failed to update status: ${response.statusText}`);
-      } catch (err) {
-        console.error('Error updating status:', err);
-        this.error = err.message;
-      }
-    }
+    
   }
 };
 </script>
