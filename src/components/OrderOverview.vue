@@ -171,10 +171,13 @@ h2 {
 
 .order-table th,
 .order-table td {
-  padding: 10px;
+ 
   border-bottom: 1px solid #ddd;
   text-align: left;
   font-weight: 400;
+  font-size: 1em;
+  color: #5f5f5f;
+  padding: 24px;
 }
 
 .order-table th {
@@ -183,8 +186,13 @@ h2 {
   text-transform: uppercase;
 }
 
+.order-table td:hover{
+  color: black;
+  font-weight: 600;
+  transition: cubic-bezier(0.165, 0.84, 0.44, 1);
+}
 .order-table tr:hover {
-  background-color: #00ff00;
+background-color: #ddd;
 }
 
 /* Responsive Styling */
