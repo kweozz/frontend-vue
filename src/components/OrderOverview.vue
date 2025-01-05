@@ -35,11 +35,12 @@
         <tbody>
           <tr v-for="order in filteredOrders" :key="order._id" @click="goToOrderDetail(order._id)">
             <td>{{ order._id }}</td>
-            <td>{{ order.user.firstName }} {{ order.user.lastName }}</td>
-            <td>{{ order.status }}</td>
+            <td>{{ order.user?.firstName || 'N/A' }} {{ order.user?.lastName || '' }}</td>
+            <td>{{ order.status || 'N/A' }}</td> <!-- Handle missing status field -->
           </tr>
         </tbody>
       </table>
+      <p v-if="filteredOrders.length === 0">No orders found</p> <!-- Add a message when no orders are found -->
     </div>
   </div>
 </template>
@@ -63,29 +64,49 @@ export default defineComponent({
   },
   computed: {
     filteredOrders() {
-      return this.orders.filter(order => {
+      const filtered = this.orders.filter(order => {
         const matchesOrderNumber = order._id.includes(this.filter.orderNumber);
-        const matchesCustomerName = `${order.user.firstName} ${order.user.lastName}`.toLowerCase().includes(this.filter.customerName.toLowerCase());
+        const matchesCustomerName = `${order.user?.firstName || ''} ${order.user?.lastName || ''}`.toLowerCase().includes(this.filter.customerName.toLowerCase());
         const matchesOrderStatus = this.filter.orderStatus ? order.status === this.filter.orderStatus : true;
         return matchesOrderNumber && matchesCustomerName && matchesOrderStatus;
       });
+      console.log('Filtered Orders:', filtered); // Log the filtered orders for debugging
+      return filtered;
     }
   },
-  mounted() {
-    this.fetchOrders();
-  },
-  methods: {
-    async fetchOrders() {
-      try {
-        const response = await axios.get('https://node-api-backend-v1.onrender.com/api/v1/orders/', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        this.orders = response.data.data.orders;
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        this.error = 'Failed to fetch orders';
+  async created() {
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        const response = await axios.get('https://node-api-backend-v1.onrender.com/api/v1/orders');
+        console.log('Orders response:', response); // Log the entire response for debugging
+        if (response.data && response.data.data && response.data.data.orders) {
+          this.orders = response.data.data.orders;
+          console.log('Orders:', this.orders); // Log the orders for debugging
+        } else {
+          this.error = 'Failed to retrieve orders';
+        }
+      } else {
+        this.error = 'No token found';
+      }
+    } catch (err) {
+      console.error('Error fetching orders:', err); // Log the error for debugging
+      if (err.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Response data:', err.response.data);
+        console.error('Response status:', err.response.status);
+        console.error('Response headers:', err.response.headers);
+        this.error = 'Failed to retrieve orders';
+      } else if (err.request) {
+        // The request was made but no response was received
+        console.error('Request data:', err.request);
+        this.error = 'No response received from server';
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error message:', err.message);
+        this.error = 'Error in setting up the request';
       }
     }
   }

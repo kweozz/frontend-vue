@@ -16,6 +16,10 @@
                     <input type="text" id="username" v-model="username" required />
                 </div>
                 <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" v-model="email" required />
+                </div>
+                <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" v-model="password" required />
                 </div>
@@ -35,6 +39,7 @@ export default defineComponent({
   data() {
     return {
       username: '',
+      email: '', // Add email field here
       password: '',
       error: ''
     };
@@ -42,14 +47,39 @@ export default defineComponent({
   methods: {
     async login() {
       try {
-        const response = await axios.post('https://node-api-backend-v1.onrender.com/api/v1/admin/login', {
+        const response = await axios.post('https://node-api-backend-v1.onrender.com/api/v1/admin/login', { // Ensure the URL is correct
           username: this.username,
+          email: this.email,
           password: this.password
         });
-        localStorage.setItem('token', response.data.token);
-        this.$router.push('/orders');
+        console.log('Response:', response); // Log the entire response for debugging
+        const token = response.data.data.token; // Access the token from the nested data object
+        if (token) {
+          localStorage.setItem('token', token);
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          console.log('Logged in successfully + token:', token);
+          this.$router.push('/orders');
+        } else {
+          this.error = 'Failed to retrieve token';
+        }
       } catch (err) {
-        this.error = 'Invalid username or password';
+        console.error('Login error:', err); // Log the error for debugging
+        if (err.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          console.error('Response data:', err.response.data);
+          console.error('Response status:', err.response.status);
+          console.error('Response headers:', err.response.headers);
+          this.error = 'Invalid username, email, or password';
+        } else if (err.request) {
+          // The request was made but no response was received
+          console.error('Request data:', err.request);
+          this.error = 'No response received from server';
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          console.error('Error message:', err.message);
+          this.error = 'Error in setting up the request';
+        }
       }
     }
   }
@@ -129,19 +159,4 @@ h2 {
 button {
     padding: 10px 20px;
     background-color: #000;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-}
-
-button:hover {
-    background-color: #00ff00;
-    color: #000;
-}
-
-.error-message {
-    color: red;
-    margin-top: 10px;
-}
-</style>
+    color: #fff;    border: none;    cursor: pointer;    border-radius: 4px;}button:hover {    background-color: #00ff00;    color: #000;}.error-message {    color: red;    margin-top: 10px;}</style>
