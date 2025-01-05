@@ -16,7 +16,6 @@
           <tr>
             <th>Order Number</th>
             <th>Customer Name</th>
-            <th>Shoe Name</th>
             <th>Order Status</th>
           </tr>
         </thead>
@@ -24,7 +23,6 @@
           <tr v-for="order in orders" :key="order._id">
             <td>{{ order._id }}</td>
             <td>{{ order.user.firstName }} {{ order.user.lastName }}</td>
-            <td>{{ order.shoeName }}</td>
             <td>{{ order.status }}</td>
           </tr>
         </tbody>
