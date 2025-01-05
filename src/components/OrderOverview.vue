@@ -7,16 +7,17 @@
       </div>
       <h2>Order Overview</h2>
       <h2>ADMIN</h2>
-
     </nav>
-    <div class="order-summary-container">
 
+    <!-- Order Overview -->
+    <div class="order-summary-container">
       <table class="order-table">
         <thead>
           <tr>
             <th>Order Number</th>
             <th>Customer Name</th>
             <th>Shoe Name</th>
+            <th>Order Status</th>
           </tr>
         </thead>
         <tbody>
@@ -24,6 +25,7 @@
             <td>{{ order._id }}</td>
             <td>{{ order.user.firstName }} {{ order.user.lastName }}</td>
             <td>{{ order.shoeName }}</td>
+            <td>{{ order.status }}</td>
           </tr>
         </tbody>
       </table>
@@ -124,5 +126,39 @@ h2 {
 
 .order-table tr:hover {
   background-color: #00ff00;
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .logo {
+    width: 25%;
+  }
+
+  .order-page {
+    padding: 10px;
+  }
+
+  .order-table th, .order-table td {
+    padding: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar h2 {
+    font-size: 1rem;
+  }
+
+  .order-page {
+    padding: 5px;
+  }
+
+  .order-table th, .order-table td {
+    padding: 2px;
+  }
 }
 </style>
