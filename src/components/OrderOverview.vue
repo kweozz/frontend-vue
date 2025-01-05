@@ -109,6 +109,11 @@ export default defineComponent({
         this.error = 'Error in setting up the request';
       }
     }
+  },
+  methods: {
+    goToOrderDetail(orderId) {
+      this.$router.push(`/orders/${orderId}`);
+    }
   }
 });
 </script>
