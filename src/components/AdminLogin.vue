@@ -97,7 +97,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 2% 0%;
+  padding: 10px 20px;
   background-color: white;
   border-bottom: 1px solid #ddd;
   width: 100%;
