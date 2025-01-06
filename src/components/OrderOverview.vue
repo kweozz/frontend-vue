@@ -24,11 +24,9 @@
         <option value="today">Today</option>
         <option value="lastWeek">Last Week</option>
         <option value="lastMonth">Last Month</option>
-       
-   
       </select>
-      <button @click="selectAllOrders">Select All</button>
-      <button @click="confirmDeleteSelected">Delete Selected</button>
+      <button @click="toggleSelectAllOrders">{{ selectedOrders.length ? 'Deselect All' : 'Select All' }}</button>
+      <button class="delete-btn" v-if="selectedOrders.length" @click="confirmDeleteSelected">Delete Selected</button>
     </div>
 
     <!-- Order Overview -->
@@ -201,8 +199,12 @@ export default defineComponent({
       this.showModal = false;
       this.orderIdToDelete = null;
     },
-    selectAllOrders() {
-      this.selectedOrders = this.filteredOrders.map(order => order._id);
+    toggleSelectAllOrders() {
+      if (this.selectedOrders.length) {
+        this.selectedOrders = [];
+      } else {
+        this.selectedOrders = this.filteredOrders.map(order => order._id);
+      }
     },
     formatDate(dateString) {
       const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
@@ -219,7 +221,7 @@ export default defineComponent({
         case 'lastWeek':
           const startOfLastWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
           const endOfLastWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-          
+          return date >= startOfLastWeek && date <= endOfLastWeek;
         case 'today':
           return date.toDateString() === now.toDateString();
         default:
@@ -296,7 +298,9 @@ h2 {
   background-color: #00ff00;
   color: #000;
 }
-
+.filter-section .delete-btn{
+  background-color: red;
+}
 /* Order Page */
 .order-page {
   display: flex;
@@ -403,7 +407,9 @@ h2 {
   cursor: pointer;
   border-radius: 4px;
 }
-
+td i{
+  color: #000;
+}
 .cancel-button:hover {
   background-color: #ff4d4d;
   color: #000;
@@ -487,5 +493,6 @@ h2 {
     font-weight: bold;
     text-align: left;
   }
+
 }
 </style>
