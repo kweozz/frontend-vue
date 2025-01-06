@@ -75,7 +75,7 @@
           const token = localStorage.getItem('token');
           if (token) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            const response = await axios.get(`https://node-api-backend-v1.onrender.com/api/v1/admin/${this._id}`);
+            const response = await axios.get('https://node-api-backend-v1.onrender.com/api/v1/admin');
             console.log('Admin profile response:', response); // Log the entire response for debugging
             if (response.data) {
               this.admin = response.data;
@@ -118,7 +118,7 @@
       },
       async updateProfile() {
         try {
-          const response = await axios.put('https://node-api-backend-v1.onrender.com/api/v1/admin/', {
+          const response = await axios.put('https://node-api-backend-v1.onrender.com/api/v1/admin', {
             username: this.admin.username,
             email: this.admin.email,
             oldPassword: this.passwords.oldPassword,
