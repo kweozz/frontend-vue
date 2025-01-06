@@ -38,10 +38,28 @@
 
         <div class="section">
           <h3 class="section-title">Shoe Configuration</h3>
-          <p><strong>Colors:</strong> <input type="text" v-model="formattedColors" class="input-field" /></p>
-          <p><strong>Fabrics:</strong> <input type="text" v-model="formattedFabrics" class="input-field" /></p>
+          <p><strong>Colors:</strong></p>
+          <ul>
+            <li v-for="(color, part) in order.shoeConfig.colors" :key="part">
+              {{ partNameMapping[part] || part }}: {{ colorMapping[color] || color }}
+              <span :style="{ border: '1px solid black', display: 'inline-block', width: '20px', height: '20px', backgroundColor: color, marginLeft: '10px' }"></span>
+            </li>
+          </ul>
+          <p><strong>Fabrics:</strong></p>
+          <ul>
+            <li v-for="(fabric, part) in order.shoeConfig.fabrics" :key="part">
+              {{ partNameMapping[part] || part }}: {{ fabricMapping[fabric] || fabric }}
+            </li>
+          </ul>
           <p><strong>Initials:</strong> <input type="text" v-model="order.shoeConfig.initials" class="input-field" /></p>
-          <p><strong>Size:</strong> <input type="text" v-model="order.shoeConfig.size" class="input-field" /></p>
+          <p><strong>Size:</strong> 
+            <select v-model="order.shoeConfig.size" class="input-field">
+              <option v-for="size in sizes" :key="size" :value="size">{{ size }}</option>
+            </select>
+          </p>
+        </div>
+        <div class="section">
+          <h3 class="section-title">Price Information</h3>
           <p><strong>Base Price:</strong> <input type="number" v-model="order.price.basePrice" class="input-field" /></p>
           <p><strong>Customization Fee:</strong> <input type="number" v-model="order.price.customizationFee" class="input-field" /></p>
           <p><strong>Shipping Cost:</strong> <input type="number" v-model="order.price.shippingCost" class="input-field" /></p>
@@ -79,29 +97,47 @@ export default {
       error: null,
       showModal: false,
       modalMessage: '',
-      action: null
+      action: null,
+      partNameMapping: {
+        inside: 'Inside',
+        laces: 'Laces',
+        outside_1: 'Outside 1',
+        outside_2: 'Outside 2',
+        outside_3: 'Outside 3',  
+        sole_bottom: 'Sole Bottom',
+        sole_top: 'Sole Top'
+
+      },
+      colorMapping: {
+        '#fce4ec': 'Pink',
+        '#f50057': 'Hot Pink',
+        '#d50000': 'Red',
+        '#ff5722': 'Orange',
+        '#ffeb3b': 'Yellow',
+        '#ffffff': 'White',
+        '#8bc34a': 'Light Green',
+        '#009688': 'Teal',
+        '#03a9f4': 'Light Blue',
+        '#673ab7': 'Purple',
+        '#000000': 'Black'
+      },
+      fabricMapping: {
+        none: 'None',
+        leather: 'Leather'
+        // Add more fabric mappings as needed
+      },
+      fabricTextures: {
+        none: '',
+        leather: '/path/to/leather-texture.jpg'
+        // Add more fabric textures as needed
+      },
+      sizes: Array.from({ length: 11 }, (_, i) => i + 36) // Sizes from 36 to 46
     };
   },
   created() {
     this.fetchOrder();
   },
   computed: {
-    formattedColors: {
-      get() {
-        return Array.isArray(this.order?.shoeConfig?.colors) ? this.order.shoeConfig.colors.join(', ') : 'N/A';
-      },
-      set(value) {
-        this.order.shoeConfig.colors = value.split(',').map(color => color.trim());
-      }
-    },
-    formattedFabrics: {
-      get() {
-        return Array.isArray(this.order?.shoeConfig?.fabrics) ? this.order.shoeConfig.fabrics.join(', ') : 'N/A';
-      },
-      set(value) {
-        this.order.shoeConfig.fabrics = value.split(',').map(fabric => fabric.trim());
-      }
-    },
     totalPrice() {
       return (
         (this.order.price.basePrice || 0) +
@@ -219,7 +255,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
- padding: 2% 0%;
+  padding: 2% 0%;
   background-color: white;
   border-bottom: 1px solid #ddd;
 }
@@ -262,6 +298,9 @@ h2 {
   flex-direction: column;
   flex: 1;
   padding: 20px;
+}
+p strong {
+ text-transform: uppercase;
 }
 
 .order-summary-container {
