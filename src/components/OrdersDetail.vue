@@ -36,8 +36,8 @@
           </thead>
           <tbody>
             <tr>
-              <td>{{ order.shoeConfig?.colors?.join(', ') || 'N/A' }}</td>
-              <td>{{ order.shoeConfig?.fabrics?.join(', ') || 'N/A' }}</td>
+              <td>{{ formattedColors }}</td>
+              <td>{{ formattedFabrics }}</td>
               <td>{{ order.shoeConfig?.initials || 'N/A' }}</td>
               <td>{{ order.shoeConfig?.size || 'N/A' }}</td>
               <td>{{ order.price?.basePrice || 'N/A' }}</td>
@@ -66,6 +66,14 @@ export default {
   },
   created() {
     this.fetchOrder();
+  },
+  computed: {
+    formattedColors() {
+      return Array.isArray(this.order?.shoeConfig?.colors) ? this.order.shoeConfig.colors.join(', ') : 'N/A';
+    },
+    formattedFabrics() {
+      return Array.isArray(this.order?.shoeConfig?.fabrics) ? this.order.shoeConfig.fabrics.join(', ') : 'N/A';
+    }
   },
   methods: {
     async fetchOrder() {
@@ -104,7 +112,21 @@ export default {
       const options = { year: "numeric", month: "short", day: "numeric" };
       return new Date(dateString).toLocaleDateString(undefined, options);
     },
-    
+    async updateStatus() {
+      try {
+        const response = await axios.put(`https://node-api-backend-v1.onrender.com/api/v1/orders/${this.order._id}`, {
+          status: this.order.status
+        }, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (!response.ok) throw new Error(`Failed to update status: ${response.statusText}`);
+      } catch (err) {
+        console.error('Error updating status:', err);
+        this.error = err.message;
+      }
+    }
   }
 };
 </script>
