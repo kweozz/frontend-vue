@@ -15,7 +15,7 @@
         <div class="section">
           <h3 class="section-title">General Information</h3>
           <p><strong>ID:</strong> {{ order._id }}</p>
-          <p><strong>Status:</strong> 
+          <p class="status-title" ><strong>Status:</strong> 
             <select v-model="order.status" class="status-dropdown">
               <option value="Pending">Pending</option>
               <option value="Shipped">Shipped</option>
@@ -276,7 +276,10 @@ h2 {
 .logo {
   width: 10%;
 }
+blockquote, dl, dd, h1, h2, h3, h4, h5, h6, hr, figure, p, pre {
+  margin: 2% 0;
 
+}
 .back-button {
   padding: 10px 20px;
   background-color: #000;
@@ -428,6 +431,11 @@ p strong {
   display: flex;
   gap: 10px;
   margin-top: 20px;
+}
+p.status-title{
+  display: flex;
+  flex-direction: column;
+ 
 }
 
 .confirm-button {
