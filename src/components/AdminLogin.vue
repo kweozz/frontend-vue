@@ -3,7 +3,7 @@
     <!-- Navbar -->
     <nav class="navbar padding">
       <div class="logo">
-        <img src="/src/assets/logo-swear.png" alt="Logo">
+        <img src="@/assets/logo-swear.png" alt="Logo">
       </div>
       <h2>Admin Login</h2>
     </nav>

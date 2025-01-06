@@ -3,7 +3,7 @@
     <!-- Navbar -->
     <nav class="navbar">
       <div class="logo">
-        <img src="/src/assets/logo-swear.png" alt="Logo">
+        <img src="@/assets/logo-swear.png" alt="Logo">
       </div>
       <h2>Order Overview</h2>
       <i class="fas fa-user-circle profile-icon" @click="goToAdminProfile"></i>
