@@ -342,11 +342,6 @@ h2 {
   text-transform: uppercase;
 }
 
-.order-table td:hover {
-  color: black;
-  font-weight: 600;
-  transition: cubic-bezier(0.165, 0.84, 0.44, 1);
-}
 
 .order-table tr:hover {
   background-color: #ddd;
