@@ -19,7 +19,16 @@
         <option value="Shipped">Shipped</option>
         <option value="Delivered">Delivered</option>
       </select>
-      <button @click="applyFilter">Apply Filter</button>
+      <select v-model="filter.dateRange">
+        <option value="">All Dates</option>
+        <option value="today">Today</option>
+        <option value="lastWeek">Last Week</option>
+        <option value="lastMonth">Last Month</option>
+       
+   
+      </select>
+      <button @click="selectAllOrders">Select All</button>
+      <button @click="confirmDeleteSelected">Delete Selected</button>
     </div>
 
     <!-- Order Overview -->
@@ -27,20 +36,40 @@
       <table class="order-table">
         <thead>
           <tr>
+            <th>Select</th>
             <th>Order Number</th>
             <th>Customer Name</th>
             <th>Order Status</th>
+            <th>Date</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="order in filteredOrders" :key="order._id" @click="goToOrderDetail(order._id)">
+          <tr v-for="order in sortedFilteredOrders" :key="order._id">
+            <td><input type="checkbox" v-model="selectedOrders" :value="order._id" /></td>
             <td>{{ order._id }}</td>
             <td>{{ order.user?.firstName || 'N/A' }} {{ order.user?.lastName || '' }}</td>
-            <td>{{ order.status || 'N/A' }}</td> <!-- Handle missing status field -->
+            <td>{{ order.status || 'N/A' }}</td>
+            <td>{{ formatDate(order.date) }}</td>
+            <td>
+              <i class="fas fa-edit edit-icon" @click="goToOrderDetail(order._id)"></i>
+              <i class="fas fa-trash delete-icon" @click="confirmDelete(order._id)"></i>
+            </td>
           </tr>
         </tbody>
       </table>
-      <p v-if="filteredOrders.length === 0">No orders found</p> <!-- Add a message when no orders are found -->
+      <p v-if="sortedFilteredOrders.length === 0">No orders found</p>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div v-if="showModal" class="modal">
+      <div class="modal-content">
+        <p>{{ modalMessage }}</p>
+        <div class="modal-buttons">
+          <button @click="executeDelete" class="confirm-button">Yes</button>
+          <button @click="cancelDelete" class="cancel-button">No</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -57,9 +86,14 @@ export default defineComponent({
       filter: {
         orderNumber: '',
         customerName: '',
-        orderStatus: ''
+        orderStatus: '',
+        dateRange: ''
       },
-      error: ''
+      selectedOrders: [],
+      error: '',
+      showModal: false,
+      modalMessage: '',
+      orderIdToDelete: null
     };
   },
   computed: {
@@ -68,10 +102,14 @@ export default defineComponent({
         const matchesOrderNumber = order._id.includes(this.filter.orderNumber);
         const matchesCustomerName = `${order.user?.firstName || ''} ${order.user?.lastName || ''}`.toLowerCase().includes(this.filter.customerName.toLowerCase());
         const matchesOrderStatus = this.filter.orderStatus ? order.status === this.filter.orderStatus : true;
-        return matchesOrderNumber && matchesCustomerName && matchesOrderStatus;
+        const matchesDateRange = this.filter.dateRange ? this.filterByDateRange(order.date) : true;
+        return matchesOrderNumber && matchesCustomerName && matchesOrderStatus && matchesDateRange;
       });
       console.log('Filtered Orders:', filtered); // Log the filtered orders for debugging
       return filtered;
+    },
+    sortedFilteredOrders() {
+      return this.filteredOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
     }
   },
   async created() {
@@ -93,18 +131,14 @@ export default defineComponent({
     } catch (err) {
       console.error('Error fetching orders:', err); // Log the error for debugging
       if (err.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
         console.error('Response data:', err.response.data);
         console.error('Response status:', err.response.status);
         console.error('Response headers:', err.response.headers);
         this.error = 'Failed to retrieve orders';
       } else if (err.request) {
-        // The request was made but no response was received
         console.error('Request data:', err.request);
         this.error = 'No response received from server';
       } else {
-        // Something happened in setting up the request that triggered an Error
         console.error('Error message:', err.message);
         this.error = 'Error in setting up the request';
       }
@@ -113,12 +147,92 @@ export default defineComponent({
   methods: {
     goToOrderDetail(orderId) {
       this.$router.push(`/orders/${orderId}`);
+    },
+    confirmDelete(orderId) {
+      this.modalMessage = 'Are you sure you want to delete this order?';
+      this.orderIdToDelete = orderId;
+      this.showModal = true;
+    },
+    confirmDeleteSelected() {
+      this.modalMessage = 'Are you sure you want to delete the selected orders?';
+      this.orderIdToDelete = null;
+      this.showModal = true;
+    },
+    async executeDelete() {
+      this.showModal = false;
+      if (this.orderIdToDelete) {
+        await this.deleteOrder(this.orderIdToDelete);
+      } else {
+        await this.deleteSelectedOrders();
+      }
+    },
+    async deleteOrder(orderId) {
+      try {
+        const response = await axios.delete(`https://node-api-backend-v1.onrender.com/api/v1/orders/${orderId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.status !== 200) throw new Error(`Failed to delete order: ${response.statusText}`);
+        alert('Order deleted successfully');
+        this.orders = this.orders.filter(order => order._id !== orderId);
+      } catch (err) {
+        console.error('Error deleting order:', err);
+        this.error = err.message;
+      }
+    },
+    async deleteSelectedOrders() {
+      try {
+        const promises = this.selectedOrders.map(orderId => axios.delete(`https://node-api-backend-v1.onrender.com/api/v1/orders/${orderId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }));
+        await Promise.all(promises);
+        alert('Selected orders deleted successfully');
+        this.orders = this.orders.filter(order => !this.selectedOrders.includes(order._id));
+        this.selectedOrders = [];
+      } catch (err) {
+        console.error('Error deleting selected orders:', err);
+        this.error = err.message;
+      }
+    },
+    cancelDelete() {
+      this.showModal = false;
+      this.orderIdToDelete = null;
+    },
+    selectAllOrders() {
+      this.selectedOrders = this.filteredOrders.map(order => order._id);
+    },
+    formatDate(dateString) {
+      const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    },
+    filterByDateRange(dateString) {
+      const date = new Date(dateString);
+      const now = new Date();
+      switch (this.filter.dateRange) {
+        case 'lastMonth':
+          const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+          const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+          return date >= startOfLastMonth && date <= endOfLastMonth;
+        case 'lastWeek':
+          const startOfLastWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+          const endOfLastWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+          
+        case 'today':
+          return date.toDateString() === now.toDateString();
+        default:
+          return true;
+      }
     }
   }
 });
 </script>
 
 <style scoped>
+@import '@fortawesome/fontawesome-free/css/all.css';
+
 body {
   display: flex;
   flex-direction: column;
@@ -226,6 +340,73 @@ h2 {
 
 .order-table tr:hover {
   background-color: #ddd;
+}
+
+.edit-icon, .delete-icon {
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.edit-icon:hover {
+  color: #00ff00;
+}
+
+.delete-icon:hover {
+  color: #ff0000;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.confirm-button {
+  padding: 10px 20px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.confirm-button:hover {
+  background-color: #00ff00;
+  color: #000;
+}
+
+.cancel-button {
+  padding: 10px 20px;
+  background-color: #ff0000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.cancel-button:hover {
+  background-color: #ff4d4d;
+  color: #000;
 }
 
 /* Responsive Styling */
