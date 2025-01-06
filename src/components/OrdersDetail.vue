@@ -6,50 +6,65 @@
         <img src="/src/assets/logo-swear.png" alt="Logo">
       </div>
       <h2>Order Details</h2>
-      <h2>ADMIN</h2>
+      <button @click="goBack" class="back-button">Back to Orders</button>
     </nav>
 
     <!-- Order Details -->
     <div class="order-summary-container">
-      <h1 class="text-2xl font-bold mb-4">Order Details</h1>
-      <div v-if="order" class="p-4 bg-white rounded-lg shadow-md">
-        <p><strong>ID:</strong> {{ order._id }}</p>
-        <p><strong>Status:</strong> {{ order.status }}</p>
-        <p><strong>Date:</strong> {{ formatDate(order.date) }}</p>
-        <p><strong>Shoe Name:</strong> {{ order.shoeName }}</p>
-        <p><strong>User:</strong> {{ order.user?.firstName || 'N/A' }} {{ order.user?.lastName || '' }}</p>
-        <p><strong>Phone:</strong> {{ order.user?.phone || 'N/A' }}</p>
-        <p><strong>Email:</strong> {{ order.user?.email || 'N/A' }}</p>
-        <p><strong>Address:</strong> {{ order.user?.address || 'N/A' }}</p>
-        <table class="order-table">
-          <thead>
-            <tr>
-              <th>Colors</th>
-              <th>Fabrics</th>
-              <th>Initials</th>
-              <th>Size</th>
-              <th>Base Price</th>
-              <th>Customization Fee</th>
-              <th>Shipping Cost</th>
-              <th>Total Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>{{ formattedColors }}</td>
-              <td>{{ formattedFabrics }}</td>
-              <td>{{ order.shoeConfig?.initials || 'N/A' }}</td>
-              <td>{{ order.shoeConfig?.size || 'N/A' }}</td>
-              <td>{{ order.price?.basePrice || 'N/A' }}</td>
-              <td>{{ order.price?.customizationFee || 'N/A' }}</td>
-              <td>{{ order.price?.shippingCost || 'N/A' }}</td>
-              <td>{{ order.price?.totalPrice || 'N/A' }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <button @click="updateStatus" class="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Update Status</button>
+      <div v-if="order" class="order-summary">
+        <div class="section">
+          <h3 class="section-title">General Information</h3>
+          <p><strong>ID:</strong> {{ order._id }}</p>
+          <p><strong>Status:</strong> 
+            <select v-model="order.status" class="status-dropdown">
+              <option value="Pending">Pending</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </p>
+          <p><strong>Date:</strong> {{ formatDate(order.date) }}</p>
+          <p><strong>Shoe Name:</strong> <input type="text" v-model="order.shoeName" class="input-field" /></p>
+        </div>
+
+        <div class="section">
+          <h3 class="section-title">User Information</h3>
+          <p><strong>First Name:</strong> <input type="text" v-model="order.user.firstName" class="input-field" /></p>
+          <p><strong>Last Name:</strong> <input type="text" v-model="order.user.lastName" class="input-field" /></p>
+          <p><strong>Phone:</strong> <input type="text" v-model="order.user.phone" class="input-field" /></p>
+          <p><strong>Email:</strong> <input type="email" v-model="order.user.email" class="input-field" /></p>
+          <p><strong>Address:</strong> <input type="text" v-model="order.user.address" class="input-field" /></p>
+        </div>
+
+        <div class="section">
+          <h3 class="section-title">Shoe Configuration</h3>
+          <p><strong>Colors:</strong> <input type="text" v-model="formattedColors" class="input-field" /></p>
+          <p><strong>Fabrics:</strong> <input type="text" v-model="formattedFabrics" class="input-field" /></p>
+          <p><strong>Initials:</strong> <input type="text" v-model="order.shoeConfig.initials" class="input-field" /></p>
+          <p><strong>Size:</strong> <input type="text" v-model="order.shoeConfig.size" class="input-field" /></p>
+          <p><strong>Base Price:</strong> <input type="number" v-model="order.price.basePrice" class="input-field" /></p>
+          <p><strong>Customization Fee:</strong> <input type="number" v-model="order.price.customizationFee" class="input-field" /></p>
+          <p><strong>Shipping Cost:</strong> <input type="number" v-model="order.price.shippingCost" class="input-field" /></p>
+          <p><strong>Total Price:</strong> {{ totalPrice }}</p>
+        </div>
+
+        <div class="button-group">
+          <button @click="confirmUpdate" class="update-button">Update Order</button>
+          <button @click="confirmDelete" class="delete-button">Delete Order</button>
+        </div>
       </div>
       <p v-if="error" class="text-red-600 mt-4">{{ error }}</p>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div v-if="showModal" class="modal">
+      <div class="modal-content">
+        <p>{{ modalMessage }}</p>
+        <div class="modal-buttons">
+          <button @click="executeAction" class="confirm-button">Yes</button>
+          <button @click="cancelAction" class="cancel-button">No</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -61,18 +76,38 @@ export default {
   data() {
     return {
       order: null,
-      error: null
+      error: null,
+      showModal: false,
+      modalMessage: '',
+      action: null
     };
   },
   created() {
     this.fetchOrder();
   },
   computed: {
-    formattedColors() {
-      return Array.isArray(this.order?.shoeConfig?.colors) ? this.order.shoeConfig.colors.join(', ') : 'N/A';
+    formattedColors: {
+      get() {
+        return Array.isArray(this.order?.shoeConfig?.colors) ? this.order.shoeConfig.colors.join(', ') : 'N/A';
+      },
+      set(value) {
+        this.order.shoeConfig.colors = value.split(',').map(color => color.trim());
+      }
     },
-    formattedFabrics() {
-      return Array.isArray(this.order?.shoeConfig?.fabrics) ? this.order.shoeConfig.fabrics.join(', ') : 'N/A';
+    formattedFabrics: {
+      get() {
+        return Array.isArray(this.order?.shoeConfig?.fabrics) ? this.order.shoeConfig.fabrics.join(', ') : 'N/A';
+      },
+      set(value) {
+        this.order.shoeConfig.fabrics = value.split(',').map(fabric => fabric.trim());
+      }
+    },
+    totalPrice() {
+      return (
+        (this.order.price.basePrice || 0) +
+        (this.order.price.customizationFee || 0) +
+        (this.order.price.shippingCost || 0)
+      );
     }
   },
   methods: {
@@ -112,20 +147,58 @@ export default {
       const options = { year: "numeric", month: "short", day: "numeric" };
       return new Date(dateString).toLocaleDateString(undefined, options);
     },
-    async updateStatus() {
+    confirmUpdate() {
+      this.modalMessage = 'Are you sure you want to update this order?';
+      this.action = 'update';
+      this.showModal = true;
+    },
+    confirmDelete() {
+      this.modalMessage = 'Are you sure you want to delete this order?';
+      this.action = 'delete';
+      this.showModal = true;
+    },
+    async executeAction() {
+      this.showModal = false;
+      if (this.action === 'update') {
+        await this.updateOrder();
+      } else if (this.action === 'delete') {
+        await this.deleteOrder();
+      }
+    },
+    cancelAction() {
+      this.showModal = false;
+    },
+    async updateOrder() {
       try {
-        const response = await axios.put(`https://node-api-backend-v1.onrender.com/api/v1/orders/${this.order._id}`, {
-          status: this.order.status
-        }, {
+        const response = await axios.put(`https://node-api-backend-v1.onrender.com/api/v1/orders/${this.order._id}`, this.order, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }
         });
-        if (!response.ok) throw new Error(`Failed to update status: ${response.statusText}`);
+        if (response.status !== 200) throw new Error(`Failed to update order: ${response.statusText}`);
+        alert('Order updated successfully');
       } catch (err) {
-        console.error('Error updating status:', err);
+        console.error('Error updating order:', err);
         this.error = err.message;
       }
+    },
+    async deleteOrder() {
+      try {
+        const response = await axios.delete(`https://node-api-backend-v1.onrender.com/api/v1/orders/${this.order._id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.status !== 200) throw new Error(`Failed to delete order: ${response.statusText}`);
+        alert('Order deleted successfully');
+        this.$router.push('/orders');
+      } catch (err) {
+        console.error('Error deleting order:', err);
+        this.error = err.message;
+      }
+    },
+    goBack() {
+      this.$router.push('/orders');
     }
   }
 };
@@ -146,7 +219,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 20px;
+ padding: 2% 0%;
   background-color: white;
   border-bottom: 1px solid #ddd;
 }
@@ -168,6 +241,21 @@ h2 {
   width: 10%;
 }
 
+.back-button {
+  padding: 10px 20px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-left: 20px;
+}
+
+.back-button:hover {
+  background-color: #00ff00;
+  color: #000;
+}
+
 /* Order Page */
 .order-page {
   display: flex;
@@ -180,6 +268,22 @@ h2 {
   display: flex;
   flex-direction: column;
   flex: 1;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 1.2em;
+  font-weight: 400;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  background-color: #000;
+  color: white;
+  padding: 1%;
+  display: flex;
+  justify-content: center;
 }
 
 .order-table {
@@ -211,6 +315,108 @@ h2 {
 
 .order-table tr:hover {
   background-color: #ddd;
+}
+
+.input-field {
+  width: 100%;
+  padding: 8px;
+  margin: 4px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.status-dropdown {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.update-button {
+  padding: 10px 20px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.update-button:hover {
+  background-color: #00ff00;
+  color: #000;
+}
+
+.delete-button {
+  padding: 10px 20px;
+  background-color: #ff0000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.delete-button:hover {
+  background-color: #ff4d4d;
+  color: #000;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.confirm-button {
+  padding: 10px 20px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.confirm-button:hover {
+  background-color: #00ff00;
+  color: #000;
+}
+
+.cancel-button {
+  padding: 10px 20px;
+  background-color: #ff0000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.cancel-button:hover {
+  background-color: #ff4d4d;
+  color: #000;
 }
 
 /* Responsive Styling */
