@@ -6,7 +6,7 @@
         <img src="/src/assets/logo-swear.png" alt="Logo">
       </div>
       <h2>Order Overview</h2>
-      <h2>ADMIN</h2>
+      <i class="fas fa-user-circle profile-icon" @click="goToAdminProfile"></i>
     </nav>
 
     <!-- Filter Section -->
@@ -26,7 +26,7 @@
         <option value="lastMonth">Last Month</option>
       </select>
       <button @click="toggleSelectAllOrders">{{ selectedOrders.length ? 'Deselect All' : 'Select All' }}</button>
-      <button class="delete-btn" v-if="selectedOrders.length" @click="confirmDeleteSelected">Delete Selected</button>
+      <button v-if="selectedOrders.length" @click="confirmDeleteSelected">Delete Selected</button>
     </div>
 
     <!-- Order Overview -->
@@ -145,6 +145,9 @@ export default defineComponent({
   methods: {
     goToOrderDetail(orderId) {
       this.$router.push(`/orders/${orderId}`);
+    },
+    goToAdminProfile() {
+      this.$router.push('/admin-profile');
     },
     confirmDelete(orderId) {
       this.modalMessage = 'Are you sure you want to delete this order?';
@@ -271,6 +274,11 @@ h2 {
   width: 10%;
 }
 
+.profile-icon {
+  font-size: 1.5em;
+  cursor: pointer;
+}
+
 /* Filter Section */
 .filter-section {
   display: flex;
@@ -298,9 +306,7 @@ h2 {
   background-color: #00ff00;
   color: #000;
 }
-.filter-section .delete-btn{
-  background-color: red;
-}
+
 /* Order Page */
 .order-page {
   display: flex;
@@ -407,9 +413,7 @@ h2 {
   cursor: pointer;
   border-radius: 4px;
 }
-td i{
-  color: #000;
-}
+
 .cancel-button:hover {
   background-color: #ff4d4d;
   color: #000;
@@ -493,6 +497,5 @@ td i{
     font-weight: bold;
     text-align: left;
   }
-
 }
 </style>
