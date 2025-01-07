@@ -29,6 +29,11 @@
       <button v-if="selectedOrders.length" @click="confirmDeleteSelected">Delete Selected</button>
     </div>
 
+    <!-- Live Order Count -->
+    <div class="live-order-count">
+      <h3>Live Order Count: {{ orders.length }}</h3>
+    </div>
+
     <!-- Order Overview -->
     <div class="order-summary-container">
       <table class="order-table">
@@ -366,6 +371,17 @@ h2 {
 .filter-section button:hover {
   background-color: #00ff00;
   color: #000;
+}
+
+/* Live Order Count */
+.live-order-count {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.live-order-count h3 {
+  font-size: 1.5em;
+  color: #333;
 }
 
 /* Order Page */
