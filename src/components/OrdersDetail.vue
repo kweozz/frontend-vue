@@ -34,6 +34,8 @@
           <p><strong>Phone:</strong> <input type="text" v-model="order.user.phone" class="input-field" /></p>
           <p><strong>Email:</strong> <input type="email" v-model="order.user.email" class="input-field" /></p>
           <p><strong>Address:</strong> <input type="text" v-model="order.user.address" class="input-field" /></p>
+          <p><strong>Postal Code:</strong> <input type="text" v-model="order.user.postalCode" class="input-field" /></p>
+          <p><strong>City:</strong> <input type="text" v-model="order.user.city" class="input-field" /></p>
         </div>
 
         <div class="section">
