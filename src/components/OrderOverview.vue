@@ -63,10 +63,21 @@
     <div v-if="showModal" class="modal">
       <div class="modal-content">
         <p>{{ modalMessage }}</p>
-        <div class="modal-buttons">
+        <div class="modal-buttons" v-if="action !== 'success'">
           <button @click="executeDelete" class="confirm-button">Yes</button>
           <button @click="cancelDelete" class="cancel-button">No</button>
         </div>
+        <div v-else>
+          <button @click="closeModal" class="confirm-button">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Notification Modal -->
+    <div v-if="showErrorModal" class="modal">
+      <div class="modal-content">
+        <p>{{ errorMessage }}</p>
+        <button @click="closeErrorModal" class="confirm-button">OK</button>
       </div>
     </div>
   </div>
@@ -90,8 +101,11 @@ export default defineComponent({
       selectedOrders: [],
       error: '',
       showModal: false,
+      showErrorModal: false,
       modalMessage: '',
-      orderIdToDelete: null
+      errorMessage: '',
+      orderIdToDelete: null,
+      action: null
     };
   },
   computed: {
@@ -124,7 +138,8 @@ export default defineComponent({
         this.orders = response.data.data.orders; // Access the orders data
         console.log('Orders:', this.orders); // Log the orders for debugging
       } else {
-        this.error = 'Failed to retrieve orders';
+        this.errorMessage = 'Failed to retrieve orders';
+        this.showErrorModal = true;
       }
     } catch (err) {
       console.error('Error fetching orders:', err); // Log the error for debugging
@@ -132,14 +147,15 @@ export default defineComponent({
         console.error('Response data:', err.response.data);
         console.error('Response status:', err.response.status);
         console.error('Response headers:', err.response.headers);
-        this.error = 'Failed to retrieve orders';
+        this.errorMessage = 'Failed to retrieve orders';
       } else if (err.request) {
         console.error('Request data:', err.request);
-        this.error = 'No response received from server';
+        this.errorMessage = 'No response received from server';
       } else {
         console.error('Error message:', err.message);
-        this.error = 'Error in setting up the request';
+        this.errorMessage = 'Error in setting up the request';
       }
+      this.showErrorModal = true;
     }
   },
   methods: {
@@ -152,18 +168,20 @@ export default defineComponent({
     confirmDelete(orderId) {
       this.modalMessage = 'Are you sure you want to delete this order?';
       this.orderIdToDelete = orderId;
+      this.action = 'delete';
       this.showModal = true;
     },
     confirmDeleteSelected() {
       this.modalMessage = 'Are you sure you want to delete the selected orders?';
       this.orderIdToDelete = null;
+      this.action = 'deleteSelected';
       this.showModal = true;
     },
     async executeDelete() {
       this.showModal = false;
-      if (this.orderIdToDelete) {
+      if (this.action === 'delete') {
         await this.deleteOrder(this.orderIdToDelete);
-      } else {
+      } else if (this.action === 'deleteSelected') {
         await this.deleteSelectedOrders();
       }
     },
@@ -175,11 +193,14 @@ export default defineComponent({
           }
         });
         if (response.status !== 200) throw new Error(`Failed to delete order: ${response.statusText}`);
-        alert('Order deleted successfully');
+        this.modalMessage = 'Order deleted successfully';
+        this.action = 'success';
+        this.showModal = true;
         this.orders = this.orders.filter(order => order._id !== orderId);
       } catch (err) {
         console.error('Error deleting order:', err);
-        this.error = err.message;
+        this.errorMessage = err.message;
+        this.showErrorModal = true;
       }
     },
     async deleteSelectedOrders() {
@@ -190,12 +211,15 @@ export default defineComponent({
           }
         }));
         await Promise.all(promises);
-        alert('Selected orders deleted successfully');
+        this.modalMessage = 'Selected orders deleted successfully';
+        this.action = 'success';
+        this.showModal = true;
         this.orders = this.orders.filter(order => !this.selectedOrders.includes(order._id));
         this.selectedOrders = [];
       } catch (err) {
         console.error('Error deleting selected orders:', err);
-        this.error = err.message;
+        this.errorMessage = err.message;
+        this.showErrorModal = true;
       }
     },
     cancelDelete() {
@@ -230,6 +254,12 @@ export default defineComponent({
         default:
           return true;
       }
+    },
+    closeModal() {
+      this.showModal = false;
+    },
+    closeErrorModal() {
+      this.showErrorModal = false;
     }
   }
 });
@@ -262,7 +292,7 @@ body {
 
 h2 {
   font-size: 1.5em;
-
+  margin: 0;
   letter-spacing: 0.1em;
 }
 
@@ -341,7 +371,6 @@ h2 {
   color: white;
   text-transform: uppercase;
 }
-
 
 .order-table tr:hover {
   background-color: #ddd;

@@ -73,17 +73,27 @@
           <button @click="confirmDelete" class="delete-button">Delete Order</button>
         </div>
       </div>
-      <p v-if="error" class="text-red-600 mt-4">{{ error }}</p>
     </div>
 
-    <!-- Confirmation Modal -->
+    <!-- Notification Modal -->
     <div v-if="showModal" class="modal">
       <div class="modal-content">
         <p>{{ modalMessage }}</p>
-        <div class="modal-buttons">
+        <div class="modal-buttons" v-if="action !== 'success'">
           <button @click="executeAction" class="confirm-button">Yes</button>
           <button @click="cancelAction" class="cancel-button">No</button>
         </div>
+        <div v-else>
+          <button @click="closeModal" class="confirm-button">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Notification Modal -->
+    <div v-if="showErrorModal" class="modal">
+      <div class="modal-content">
+        <p>{{ errorMessage }}</p>
+        <button @click="closeErrorModal" class="confirm-button">OK</button>
       </div>
     </div>
   </div>
@@ -96,9 +106,12 @@ export default {
   data() {
     return {
       order: null,
+      originalOrder: null,
       error: null,
       showModal: false,
+      showErrorModal: false,
       modalMessage: '',
+      errorMessage: '',
       action: null,
       partNameMapping: {
         inside: 'Inside',
@@ -108,7 +121,6 @@ export default {
         outside_3: 'Outside 3',  
         sole_bottom: 'Sole Bottom',
         sole_top: 'Sole Top'
-
       },
       colorMapping: {
         '#fce4ec': 'Pink',
@@ -158,12 +170,15 @@ export default {
           console.log('Order response:', response); // Log the entire response for debugging
           if (response.data) {
             this.order = response.data;
+            this.originalOrder = JSON.parse(JSON.stringify(response.data)); // Store a copy of the original order
             console.log('Order:', this.order); // Log the order for debugging
           } else {
-            this.error = 'Failed to retrieve order';
+            this.errorMessage = 'Failed to retrieve order';
+            this.showErrorModal = true;
           }
         } else {
-          this.error = 'No token found';
+          this.errorMessage = 'No token found';
+          this.showErrorModal = true;
         }
       } catch (err) {
         console.error('Error fetching order details:', err); // Log the error for debugging
@@ -171,14 +186,15 @@ export default {
           console.error('Response data:', err.response.data);
           console.error('Response status:', err.response.status);
           console.error('Response headers:', err.response.headers);
-          this.error = 'Failed to retrieve order';
+          this.errorMessage = 'Failed to retrieve order';
         } else if (err.request) {
           console.error('Request data:', err.request);
-          this.error = 'No response received from server';
+          this.errorMessage = 'No response received from server';
         } else {
           console.error('Error message:', err.message);
-          this.error = 'Error in setting up the request';
+          this.errorMessage = 'Error in setting up the request';
         }
+        this.showErrorModal = true;
       }
     },
     formatDate(dateString) {
@@ -186,6 +202,11 @@ export default {
       return new Date(dateString).toLocaleDateString(undefined, options);
     },
     confirmUpdate() {
+      if (JSON.stringify(this.order) === JSON.stringify(this.originalOrder)) {
+        this.errorMessage = 'No updates made. Please edit before updating.';
+        this.showErrorModal = true;
+        return;
+      }
       this.modalMessage = 'Are you sure you want to update this order?';
       this.action = 'update';
       this.showModal = true;
@@ -214,10 +235,14 @@ export default {
           }
         });
         if (response.status !== 200) throw new Error(`Failed to update order: ${response.statusText}`);
-        alert('Order updated successfully');
+        this.modalMessage = 'Order updated successfully';
+        this.action = 'success';
+        this.showModal = true;
+        this.originalOrder = JSON.parse(JSON.stringify(this.order)); // Update the original order copy
       } catch (err) {
         console.error('Error updating order:', err);
-        this.error = err.message;
+        this.errorMessage = err.message;
+        this.showErrorModal = true;
       }
     },
     async deleteOrder() {
@@ -228,15 +253,26 @@ export default {
           }
         });
         if (response.status !== 200) throw new Error(`Failed to delete order: ${response.statusText}`);
-        alert('Order deleted successfully');
-        this.$router.push('/orders');
+        this.modalMessage = 'Order deleted successfully';
+        this.action = 'success';
+        this.showModal = true;
       } catch (err) {
         console.error('Error deleting order:', err);
-        this.error = err.message;
+        this.errorMessage = err.message;
+        this.showErrorModal = true;
       }
     },
     goBack() {
       this.$router.push('/orders');
+    },
+    closeModal() {
+      if (this.action === 'success') {
+        this.$router.push('/orders');
+      }
+      this.showModal = false;
+    },
+    closeErrorModal() {
+      this.showErrorModal = false;
     }
   }
 };
