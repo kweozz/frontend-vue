@@ -137,7 +137,7 @@ export default defineComponent({
   },
   methods: {
     initializeSocket() {
-      this.socket = io('http://localhost:3000');
+      this.socket = io('wss://node-api-backend-v1.onrender.com');
 
       this.socket.on('connect', () => {
         console.log('Connected to server');
