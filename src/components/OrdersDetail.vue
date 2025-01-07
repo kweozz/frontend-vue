@@ -1,6 +1,6 @@
 <template>
   <div class="order-page">
-    <!-- Navbar -->
+    <!-- Navbar    -->
     <nav class="navbar">
       <div class="logo">
         <img src="../assets/logo-swear.png" alt="Logo">
@@ -9,7 +9,7 @@
       <button @click="goBack" class="back-button">Back to Orders</button>
     </nav>
 
-    <!-- Order Details -->
+    <!-- Order Details---->
     <div class="order-summary-container">
       <div v-if="order" class="order-summary">
         <div class="section">
