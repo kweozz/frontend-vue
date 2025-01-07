@@ -3,7 +3,7 @@
     <!-- Navbar -->
     <nav class="navbar">
       <div class="logo">
-        <img src="@/assets/logo-swear.png" alt="Logo">
+        <img src="../assets/logo-swear.png" alt="Logo">
       </div>
       <h2>Order Details</h2>
       <button @click="goBack" class="back-button">Back to Orders</button>
