@@ -111,20 +111,20 @@ export default defineComponent({
     }
   },
   async created() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this.$router.push('/'); // Redirect to login page if no token is found
+      return;
+    }
     try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        const response = await axios.get('https://node-api-backend-v1.onrender.com/api/v1/orders');
-        console.log('Orders response:', response); // Log the entire response for debugging
-        if (response.data && response.data.data && response.data.data.orders) {
-          this.orders = response.data.data.orders;
-          console.log('Orders:', this.orders); // Log the orders for debugging
-        } else {
-          this.error = 'Failed to retrieve orders';
-        }
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      const response = await axios.get('https://node-api-backend-v1.onrender.com/api/v1/orders');
+      console.log('Orders response:', response); // Log the entire response for debugging
+      if (response.data && response.data.data && response.data.data.orders) {
+        this.orders = response.data.data.orders;
+        console.log('Orders:', this.orders); // Log the orders for debugging
       } else {
-        this.error = 'No token found';
+        this.error = 'Failed to retrieve orders';
       }
     } catch (err) {
       console.error('Error fetching orders:', err); // Log the error for debugging
