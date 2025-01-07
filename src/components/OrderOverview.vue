@@ -86,6 +86,7 @@
 <script>
 import { defineComponent } from 'vue';
 import axios from 'axios';
+import { io } from 'socket.io-client';
 
 export default defineComponent({
   name: 'OrderOverview',
@@ -105,7 +106,8 @@ export default defineComponent({
       modalMessage: '',
       errorMessage: '',
       orderIdToDelete: null,
-      action: null
+      action: null,
+      socket: null
     };
   },
   computed: {
@@ -125,40 +127,64 @@ export default defineComponent({
     }
   },
   async created() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      this.$router.push('/'); // Redirect to login page if no token is found
-      return;
-    }
-    try {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      const response = await axios.get('https://node-api-backend-v1.onrender.com/api/v1/orders');
-      console.log('Orders response:', response); // Log the entire response for debugging
-      if (response.data && response.data.data && response.data.data.orders) {
-        this.orders = response.data.data.orders; // Access the orders data
-        console.log('Orders:', this.orders); // Log the orders for debugging
-      } else {
-        this.errorMessage = 'Failed to retrieve orders';
-        this.showErrorModal = true;
-      }
-    } catch (err) {
-      console.error('Error fetching orders:', err); // Log the error for debugging
-      if (err.response) {
-        console.error('Response data:', err.response.data);
-        console.error('Response status:', err.response.status);
-        console.error('Response headers:', err.response.headers);
-        this.errorMessage = 'Failed to retrieve orders';
-      } else if (err.request) {
-        console.error('Request data:', err.request);
-        this.errorMessage = 'No response received from server';
-      } else {
-        console.error('Error message:', err.message);
-        this.errorMessage = 'Error in setting up the request';
-      }
-      this.showErrorModal = true;
-    }
+    this.initializeSocket();
+    await this.fetchOrders();
   },
   methods: {
+    initializeSocket() {
+      this.socket = io('http://localhost:3000');
+
+      this.socket.on('connect', () => {
+        console.log('Connected to server');
+      });
+
+      this.socket.on('newOrder', (order) => {
+        console.log('New order:', order);
+        this.orders.unshift(order);
+      });
+
+      this.socket.on('disconnect', () => {
+        console.log('Disconnected from server');
+      });
+
+      this.socket.on('error', (error) => {
+        console.error('Socket error:', error);
+      });
+    },
+    async fetchOrders() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        this.$router.push('/'); // Redirect to login page if no token is found
+        return;
+      }
+      try {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        const response = await axios.get('https://node-api-backend-v1.onrender.com/api/v1/orders');
+        console.log('Orders response:', response); // Log the entire response for debugging
+        if (response.data && response.data.data && response.data.data.orders) {
+          this.orders = response.data.data.orders; // Access the orders data
+          console.log('Orders:', this.orders); // Log the orders for debugging
+        } else {
+          this.errorMessage = 'Failed to retrieve orders';
+          this.showErrorModal = true;
+        }
+      } catch (err) {
+        console.error('Error fetching orders:', err); // Log the error for debugging
+        if (err.response) {
+          console.error('Response data:', err.response.data);
+          console.error('Response status:', err.response.status);
+          console.error('Response headers:', err.response.headers);
+          this.errorMessage = 'Failed to retrieve orders';
+        } else if (err.request) {
+          console.error('Request data:', err.request);
+          this.errorMessage = 'No response received from server';
+        } else {
+          console.error('Error message:', err.message);
+          this.errorMessage = 'Error in setting up the request';
+        }
+        this.showErrorModal = true;
+      }
+    },
     goToOrderDetail(orderId) {
       this.$router.push(`/orders/${orderId}`);
     },
@@ -260,6 +286,11 @@ export default defineComponent({
     },
     closeErrorModal() {
       this.showErrorModal = false;
+    }
+  },
+  beforeUnmount() {
+    if (this.socket) {
+      this.socket.disconnect();
     }
   }
 });
