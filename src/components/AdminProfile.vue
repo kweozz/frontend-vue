@@ -74,11 +74,12 @@
         try {
           const token = localStorage.getItem('token');
           if (token) {
+            // console.log('Token found:', token); // Log the token for debugging
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             const response = await axios.get('https://node-api-backend-v1.onrender.com/api/v1/admin');
             console.log('Admin profile response:', response); // Log the entire response for debugging
-            if (response.data) {
-              this.admin = response.data;
+            if (response.data && response.data.data && response.data.data.admins && response.data.data.admins[0]) {
+              this.admin = response.data.data.admins[0]; // Access the admin profile data
               console.log('Admin profile:', this.admin); // Log the admin profile for debugging
             } else {
               this.error = 'Failed to retrieve admin profile. Please try again later or contact support.';
@@ -118,7 +119,8 @@
       },
       async updateProfile() {
         try {
-          const response = await axios.put('https://node-api-backend-v1.onrender.com/api/v1/admin/', {
+          const adminId = this.admin._id; // Access the admin ID
+          const response = await axios.put(`https://node-api-backend-v1.onrender.com/api/v1/admin/${adminId}`, {
             username: this.admin.username,
             email: this.admin.email,
             oldPassword: this.passwords.oldPassword,

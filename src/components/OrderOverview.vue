@@ -121,7 +121,7 @@ export default defineComponent({
       const response = await axios.get('https://node-api-backend-v1.onrender.com/api/v1/orders');
       console.log('Orders response:', response); // Log the entire response for debugging
       if (response.data && response.data.data && response.data.data.orders) {
-        this.orders = response.data.data.orders;
+        this.orders = response.data.data.orders; // Access the orders data
         console.log('Orders:', this.orders); // Log the orders for debugging
       } else {
         this.error = 'Failed to retrieve orders';
