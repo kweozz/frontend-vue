@@ -17,7 +17,7 @@
           <p><strong>ID:</strong> {{ order._id }}</p>
           <p class="status-title" ><strong>Status:</strong> 
             <select v-model="order.status" class="status-dropdown">
-              <option value="Pending">Pending</option>
+              <option value="NewOrder">New Order</option>
               <option value="Shipped">Shipped</option>
               <option value="Delivered">Delivered</option>
               <option value="Cancelled">Cancelled</option>

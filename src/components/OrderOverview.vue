@@ -15,9 +15,10 @@
       <input type="text" v-model="filter.customerName" placeholder="Filter by Customer Name" />
       <select v-model="filter.orderStatus">
         <option value="">All Statuses</option>
-        <option value="Pending">Pending</option>
+        <option value="NewOrder">New Order</option>
         <option value="Shipped">Shipped</option>
         <option value="Delivered">Delivered</option>
+        <option value="Cancelled">Cancelled</option>
       </select>
       <select v-model="filter.dateRange">
         <option value="">All Dates</option>
@@ -31,7 +32,7 @@
 
     <!-- Live Order Count -->
     <div class="live-order-count">
-      <h3>Live Order Count: {{ orders.length }}</h3>
+      <h3>Order Count: {{ orders.length }} <span class="live-label">Live</span></h3>
     </div>
 
     <!-- Order Overview -->
@@ -389,6 +390,12 @@ h2 {
 .live-order-count h3 {
   font-size: 1.5em;
   color: #333;
+}
+
+.live-label {
+  color: red; /* Adjust the color as needed */
+  font-weight: bold;
+  margin-left: 5px;
 }
 
 /* Order Page */
