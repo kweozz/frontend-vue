@@ -50,12 +50,12 @@
           </thead>
           <tbody>
             <tr v-for="order in sortedFilteredOrders" :key="order._id">
-              <td><input type="checkbox" v-model="selectedOrders" :value="order._id" /></td>
-              <td>{{ order._id }}</td>
-              <td>{{ order.user?.firstName || 'N/A' }} {{ order.user?.lastName || '' }}</td>
-              <td>{{ order.status || 'N/A' }}</td>
-              <td>{{ formatDate(order.date) }}</td>
-              <td>
+              <td data-label="Select"><input type="checkbox" v-model="selectedOrders" :value="order._id" /></td>
+              <td data-label="Order Number">{{ order._id }}</td>
+              <td data-label="Customer Name">{{ order.user?.firstName || 'N/A' }} {{ order.user?.lastName || '' }}</td>
+              <td data-label="Order Status">{{ order.status || 'N/A' }}</td>
+              <td data-label="Date">{{ formatDate(order.date) }}</td>
+              <td data-label="Actions">
                 <i class="fas fa-edit edit-icon" @click="goToOrderDetail(order._id)"></i>
                 <i class="fas fa-trash delete-icon" @click="confirmDelete(order._id)"></i>
               </td>
@@ -352,6 +352,7 @@ h2 {
   display: flex;
   gap: 10px;
   margin: 20px 0;
+  flex-wrap: wrap;
 }
 
 .filter-section input,
@@ -359,6 +360,8 @@ h2 {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  flex: 1;
+  min-width: 150px;
 }
 
 .filter-section button {
@@ -368,6 +371,8 @@ h2 {
   border: none;
   cursor: pointer;
   border-radius: 4px;
+  flex: 1;
+  min-width: 150px;
 }
 
 .filter-section button:hover {
@@ -505,6 +510,7 @@ h2 {
 
   .order-page {
     padding: 10px;
+    padding-bottom: 20%;
   }
 
   .order-table th, .order-table td {
@@ -539,10 +545,6 @@ h2 {
     flex-direction: column;
   }
 
-  .order-page {
-    padding: 5px;
-  }
-
   .order-table th, .order-table td {
     padding: 2px;
   }
@@ -556,7 +558,7 @@ h2 {
   }
 
   .order-table td {
-    text-align: left;
+    text-align: right;
     padding-left: 15px;
     position: relative;
   }

@@ -513,6 +513,7 @@ p.status-title{
 
   .order-page {
     padding: 10px;
+    padding-bottom: 20%;
   }
 
   .order-table th, .order-table td {
@@ -529,9 +530,6 @@ p.status-title{
     margin-left: 0;
   }
 
-  .order-page {
-    padding: 5px;
-  }
 
   .order-table th, .order-table td {
     padding: 2px;
