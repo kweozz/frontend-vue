@@ -70,7 +70,6 @@ export default {
       },
       originalAdmin: null,
       passwords: {
-        oldPassword: '',
         newPassword: '',
         confirmNewPassword: ''
       },
@@ -126,7 +125,7 @@ export default {
       }
     },
     confirmUpdate() {
-      if (JSON.stringify(this.admin) === JSON.stringify(this.originalAdmin) && !this.passwords.oldPassword && !this.passwords.newPassword && !this.passwords.confirmNewPassword) {
+      if (JSON.stringify(this.admin) === JSON.stringify(this.originalAdmin) && !this.passwords.newPassword && !this.passwords.confirmNewPassword) {
         this.errorMessage = 'No updates made. Please edit before updating.';
         this.showErrorModal = true;
         return;
@@ -164,7 +163,6 @@ export default {
         const response = await axios.put(`https://node-api-backend-v1.onrender.com/api/v1/admin/${adminId}`, {
           username: this.admin.username,
           email: this.admin.email,
-          oldPassword: this.passwords.oldPassword,
           newPassword: this.passwords.newPassword,
           confirmNewPassword: this.passwords.confirmNewPassword
         }, {
