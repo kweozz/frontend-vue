@@ -6,7 +6,7 @@
         <img src="../assets/logo-swear.png" alt="Logo">
       </div>
       <h2>Order Details</h2>
-      <button @click="goBack" class="back-button">Back to Orders</button>
+      <button @click="goBack" class="back-button">Back</button>
     </nav>
 
     <!-- Order Details---->
@@ -284,8 +284,8 @@ body {
   flex-direction: column;
   height: 100vh;
   margin: 0;
-  overflow: hidden;
   font-family: Helvetica, sans-serif;
+  padding-bottom: 4em;
 }
 
 /* Navbar */
@@ -506,10 +506,6 @@ p.status-title{
 
 /* Responsive Styling */
 @media (max-width: 768px) {
-  .navbar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
 
   .logo {
     width: 25%;
@@ -527,6 +523,10 @@ p.status-title{
 @media (max-width: 480px) {
   .navbar h2 {
     font-size: 1rem;
+  }
+
+  .back-button {
+    margin-left: 0;
   }
 
   .order-page {

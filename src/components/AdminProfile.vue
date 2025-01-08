@@ -7,7 +7,7 @@
       </div>
       <h2>Admin Profile</h2>
       <div class="navbar-buttons">
-        <button @click="goBack" class="back-button">Back to Orders</button>
+        <button @click="goBack" class="back-button">Back</button>
         <button @click="confirmLogout" class="logout-button">Logout</button>
       </div>
     </nav>
@@ -353,9 +353,9 @@ h2 {
 
 /* Responsive Styling */
 @media (max-width: 768px) {
+
   .navbar {
-    flex-direction: column;
-    align-items: flex-start;
+    max-width: auto;
   }
 
   .logo {
@@ -368,8 +368,14 @@ h2 {
 }
 
 @media (max-width: 480px) {
+
   .navbar h2 {
-    font-size: 1rem;
+    font-size: 0.6rem;
+    text-align: center;
+  }
+
+  .logo {
+    width: 15%;
   }
 
   .admin-profile-page {

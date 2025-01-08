@@ -36,31 +36,33 @@
 
     <!-- Order Overview -->
     <div class="order-summary-container">
-      <table class="order-table">
-        <thead>
-          <tr>
-            <th>Select</th>
-            <th>Order Number</th>
-            <th>Customer Name</th>
-            <th>Order Status</th>
-            <th>Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="order in sortedFilteredOrders" :key="order._id">
-            <td><input type="checkbox" v-model="selectedOrders" :value="order._id" /></td>
-            <td>{{ order._id }}</td>
-            <td>{{ order.user?.firstName || 'N/A' }} {{ order.user?.lastName || '' }}</td>
-            <td>{{ order.status || 'N/A' }}</td>
-            <td>{{ formatDate(order.date) }}</td>
-            <td>
-              <i class="fas fa-edit edit-icon" @click="goToOrderDetail(order._id)"></i>
-              <i class="fas fa-trash delete-icon" @click="confirmDelete(order._id)"></i>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-container">
+        <table class="order-table">
+          <thead>
+            <tr>
+              <th>Select</th>
+              <th>Order Number</th>
+              <th>Customer Name</th>
+              <th>Order Status</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="order in sortedFilteredOrders" :key="order._id">
+              <td><input type="checkbox" v-model="selectedOrders" :value="order._id" /></td>
+              <td>{{ order._id }}</td>
+              <td>{{ order.user?.firstName || 'N/A' }} {{ order.user?.lastName || '' }}</td>
+              <td>{{ order.status || 'N/A' }}</td>
+              <td>{{ formatDate(order.date) }}</td>
+              <td>
+                <i class="fas fa-edit edit-icon" @click="goToOrderDetail(order._id)"></i>
+                <i class="fas fa-trash delete-icon" @click="confirmDelete(order._id)"></i>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <p v-if="sortedFilteredOrders.length === 0">No orders found</p>
     </div>
 
@@ -398,6 +400,10 @@ h2 {
   flex: 1;
 }
 
+.table-container {
+  overflow-x: auto;
+}
+
 .order-table {
   width: 100%;
   border-collapse: collapse;
@@ -492,10 +498,6 @@ h2 {
 
 /* Responsive Styling */
 @media (max-width: 768px) {
-  .navbar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
 
   .logo {
     width: 25%;
@@ -554,8 +556,8 @@ h2 {
   }
 
   .order-table td {
-    text-align: right;
-    padding-left: 50%;
+    text-align: left;
+    padding-left: 15px;
     position: relative;
   }
 
@@ -568,5 +570,24 @@ h2 {
     font-weight: bold;
     text-align: left;
   }
+
+  .order-table th {
+    display: none;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
 }
 </style>
