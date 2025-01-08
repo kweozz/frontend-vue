@@ -89,7 +89,11 @@ export default {
     async fetchAdminProfile() {
       try {
         const token = localStorage.getItem('token');
-        if (token) {
+        if (!token) {
+        this.$router.push('/'); // Redirect to login page if no token is found
+        return;
+        }
+        else if (token) {
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           const response = await axios.get('https://node-api-backend-v1.onrender.com/api/v1/admin');
           console.log('Admin profile response:', response); // Log the entire response for debugging
@@ -144,26 +148,47 @@ export default {
     },
     async updateProfile() {
       try {
-        const adminId = this.admin._id; // Access the admin ID
-        const response = await axios.put(`https://node-api-backend-v1.onrender.com/api/v1/admin/${adminId}`, {
-          username: this.admin.username,
-          email: this.admin.email,
-          oldPassword: this.passwords.oldPassword,
-          newPassword: this.passwords.newPassword,
-          confirmNewPassword: this.passwords.confirmNewPassword
-        }, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        if (response.status !== 200) throw new Error(`Failed to update profile: ${response.statusText}`);
-        this.modalMessage = 'Profile updated successfully';
-        this.action = 'success';
-        this.showModal = true;
-      } catch (err) {
-        console.error('Error updating profile:', err);
-        this.errorMessage = err.message;
+        // new passwords match?
+      if (this.passwords.newPassword !== this.passwords.confirmNewPassword) {
+        this.errorMessage = 'New passwords do not match';
         this.showErrorModal = true;
+        return;
+      }
+
+      const adminId = this.admin._id; // Access the admin ID
+      const response = await axios.put(`https://node-api-backend-v1.onrender.com/api/v1/admin/${adminId}`, {
+        username: this.admin.username,
+        email: this.admin.email,
+        oldPassword: this.passwords.oldPassword,
+        newPassword: this.passwords.newPassword,
+        confirmNewPassword: this.passwords.confirmNewPassword
+      }, {
+        headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (response.status !== 200) throw new Error(`Failed to update profile: ${response.statusText}`);
+
+      // old password check
+      console.log('Update profile response:', response);
+      if (response.data.error) {
+        if (response.data.error === 'Old password is incorrect') {
+          this.errorMessage = 'Old password is incorrect';
+        } else {
+          this.errorMessage = response.data.error;
+        }
+        this.showErrorModal = true;
+        return;
+      }
+
+      this.modalMessage = 'Profile updated successfully';
+      this.action = 'success';
+      this.showModal = true;
+      } catch (err) {
+      console.error('Error updating profile:', err);
+      this.errorMessage = err.message;
+      this.showErrorModal = true;
       }
     },
     logout() {

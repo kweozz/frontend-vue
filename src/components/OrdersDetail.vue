@@ -164,7 +164,11 @@ export default {
     async fetchOrder() {
       try {
         const token = localStorage.getItem('token');
-        if (token) {
+        if (!token) {
+        this.$router.push('/'); // Redirect to login page if no token is found
+        return;
+        }
+        else if (token) {
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           const response = await axios.get(`https://node-api-backend-v1.onrender.com/api/v1/orders/${this.$route.params.id}`);
           console.log('Order response:', response); // Log the entire response for debugging
