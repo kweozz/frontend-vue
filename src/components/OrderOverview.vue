@@ -15,7 +15,7 @@
       <input type="text" v-model="filter.customerName" placeholder="Filter by Customer Name" />
       <select v-model="filter.orderStatus">
         <option value="">All Statuses</option>
-        <option value="NewOrder">New Order</option>
+        <option value="New Order">New Order</option>
         <option value="Shipped">Shipped</option>
         <option value="Delivered">Delivered</option>
         <option value="Cancelled">Cancelled</option>
