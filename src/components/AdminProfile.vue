@@ -20,10 +20,9 @@
           <p><strong>Username:</strong> <input type="text" v-model="admin.username" class="input-field" /></p>
           <p><strong>Email:</strong> <input type="email" v-model="admin.email" class="input-field" /></p>
         </div>
-
+    
         <div class="section">
           <h3 class="section-title">Change Password</h3>
-          <p><strong>Old Password:</strong> <input type="password" v-model="passwords.oldPassword" class="input-field" /></p>
           <p><strong>New Password:</strong> <input type="password" v-model="passwords.newPassword" class="input-field" /></p>
           <p><strong>Confirm New Password:</strong> <input type="password" v-model="passwords.confirmNewPassword" class="input-field" /></p>
         </div>
@@ -176,17 +175,6 @@ export default {
 
         if (response.status !== 200) throw new Error(`Failed to update profile: ${response.statusText}`);
 
-        // old password check
-        console.log('Update profile response:', response);
-        if (response.data.error) {
-          if (response.data.error === 'Old password is incorrect') {
-            this.errorMessage = 'Old password is incorrect';
-          } else {
-            this.errorMessage = response.data.error;
-          }
-          this.showErrorModal = true;
-          return;
-        }
 
         this.modalMessage = 'Profile updated successfully';
         this.action = 'success';
